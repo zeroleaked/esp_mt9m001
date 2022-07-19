@@ -29,4 +29,6 @@
 #define REG_OREC_O		0x64
 #define REG_EN		    0xF1
 
+#define REG_TEST_DATA   0x32
+
 #endif

@@ -41,6 +41,10 @@ int mt9m001_detect(int slv_addr, sensor_id_t *id)
 
 static int init_status(sensor_t *sensor)
 {
+    uint16_t octrl_status = SCCB_Read8_16(sensor->slv_addr, REG_OCTRL);
+    SCCB_Write8_16(sensor->slv_addr, REG_OCTRL, (1<<6) | octrl_status);
+    uint16_t test_data = SCCB_Read8_16(sensor->slv_addr, REG_TEST_DATA);
+    ESP_LOGD(TAG, "Reg0x32: 0x%X", test_data);
     return 0;
 }
 
@@ -52,14 +56,33 @@ static int set_dummy(sensor_t *sensor, int enable)
 
 static int set_framesize(sensor_t *sensor, framesize_t framesize)
 {
-    ESP_LOGE(TAG, "Not support");
-    return -1;
+    int ret = SCCB_Write8_16(sensor->slv_addr, REG_RSIZE, resolution[framesize].height);
+    if (ret != ESP_OK) {
+        ESP_LOGE(TAG, "Frame height setting failed");
+        return -1;
+    }
+    ret = SCCB_Write8_16(sensor->slv_addr, REG_CSIZE, resolution[framesize].width);
+    if (ret != ESP_OK) {
+        ESP_LOGE(TAG, "Frame width setting failed");
+        return -1;
+    }
+    return 0;
 }
 
 static int set_pixformat(sensor_t *sensor, pixformat_t pixformat)
 {
-    ESP_LOGE(TAG, "Not support");
-    return -1;
+    int ret = 0;
+    sensor->pixformat = pixformat;
+    switch (pixformat) {
+        case PIXFORMAT_GRAYSCALE:
+            break;
+        default:
+            ESP_LOGE(TAG, "Not support");
+            ret = -1;
+            break;
+    }
+
+    return ret;
 }
 
 int mt9m001_init(sensor_t *sensor)
