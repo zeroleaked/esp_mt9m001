@@ -66,6 +66,9 @@
 #if CONFIG_SC030IOT_SUPPORT
 #include "sc030iot.h"
 #endif
+#if CONFIG_MT9M001_SUPPORT
+#include "mt9m001.h"
+#endif
 
 #if defined(ARDUINO_ARCH_ESP32) && defined(CONFIG_ARDUHAL_ESP_LOG)
 #include "esp32-hal-log.h"
@@ -137,9 +140,12 @@ static const sensor_func_t g_sensors[] = {
 #if CONFIG_SC030IOT_SUPPORT
     {sc030iot_detect, sc030iot_init},
 #endif
+#if CONFIG_MT9M001_SUPPORT
+    {mt9m001_detect, mt9m001_init},
+#endif
 };
 
-static esp_err_t camera_probe(const camera_config_t *config, camera_model_t *out_camera_model)
+esp_err_t camera_probe(const camera_config_t *config, camera_model_t *out_camera_model)
 {
     *out_camera_model = CAMERA_NONE;
     if (s_state != NULL) {

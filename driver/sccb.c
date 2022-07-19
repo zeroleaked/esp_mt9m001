@@ -187,3 +187,55 @@ uint8_t SCCB_Write16(uint8_t slv_addr, uint16_t reg, uint8_t data)
     }
     return ret == ESP_OK ? 0 : -1;
 }
+
+uint16_t SCCB_Read8_16(uint8_t slv_addr, uint8_t reg)
+{
+    uint16_t data=0;
+    uint8_t data_L=0;
+    uint8_t data_H=0;
+    esp_err_t ret = ESP_FAIL;
+
+    i2c_cmd_handle_t cmd = i2c_cmd_link_create();
+    i2c_master_start(cmd);
+    i2c_master_write_byte(cmd, ( slv_addr << 1 ) | WRITE_BIT, ACK_CHECK_EN); // slave write address 
+    i2c_master_write_byte(cmd, reg, ACK_CHECK_EN); // register address to be read
+    i2c_master_stop(cmd);
+    ret = i2c_master_cmd_begin(SCCB_I2C_PORT, cmd, 1000 / portTICK_RATE_MS);
+    i2c_cmd_link_delete(cmd);
+    if(ret != ESP_OK) return -1;
+
+    cmd = i2c_cmd_link_create();
+    i2c_master_start(cmd);
+    i2c_master_write_byte(cmd, ( slv_addr << 1 ) | READ_BIT, ACK_CHECK_EN); // slave read address
+    i2c_master_read_byte(cmd, &data_H, ACK_VAL); // first byte read
+    i2c_master_read_byte(cmd, &data_L, NACK_VAL); // first byte read
+    i2c_master_stop(cmd);
+    ret = i2c_master_cmd_begin(SCCB_I2C_PORT, cmd, 1000 / portTICK_RATE_MS);
+    i2c_cmd_link_delete(cmd);
+    if(ret != ESP_OK) {
+        ESP_LOGE(TAG, "SCCB_Read Failed addr:0x%02x, reg:0x%02x, data:0x%02x, ret:%d", slv_addr, reg, data, ret);
+    }
+
+    data = ((uint16_t )data_H << 8) |  data_L;
+    return data;
+}
+
+uint8_t SCCB_Write8_16(uint8_t slv_addr, uint8_t reg, uint16_t data)
+{
+    uint8_t data_L = data & 0x00FF;
+    uint8_t data_H = data >> 8;
+    esp_err_t ret = ESP_FAIL;
+    i2c_cmd_handle_t cmd = i2c_cmd_link_create();
+    i2c_master_start(cmd);
+    i2c_master_write_byte(cmd, ( slv_addr << 1 ) | WRITE_BIT, ACK_CHECK_EN);
+    i2c_master_write_byte(cmd, reg, ACK_CHECK_EN);
+    i2c_master_write_byte(cmd, data_H, ACK_CHECK_EN);
+    i2c_master_write_byte(cmd, data_L, ACK_CHECK_EN);
+    i2c_master_stop(cmd);
+    ret = i2c_master_cmd_begin(SCCB_I2C_PORT, cmd, 1000 / portTICK_RATE_MS);
+    i2c_cmd_link_delete(cmd);
+    if(ret != ESP_OK) {
+        ESP_LOGE(TAG, "SCCB_Write Failed addr:0x%02x, reg:0x%02x, data:0x%02x, ret:%d", slv_addr, reg, data, ret);
+    }
+    return ret == ESP_OK ? 0 : -1;
+}

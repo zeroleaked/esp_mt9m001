@@ -161,6 +161,8 @@ typedef struct {
 #define ESP_ERR_CAMERA_FAILED_TO_SET_OUT_FORMAT (ESP_ERR_CAMERA_BASE + 3)
 #define ESP_ERR_CAMERA_NOT_SUPPORTED            (ESP_ERR_CAMERA_BASE + 4)
 
+esp_err_t camera_probe(const camera_config_t *config, camera_model_t *out_camera_model);
+
 /**
  * @brief Initialize the camera driver
  *
