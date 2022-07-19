@@ -16,6 +16,15 @@
 static const char *TAG = "MT9M001";
 #endif
 
+static int reset(sensor_t *sensor)
+{
+    int ret = 0;
+    SCCB_Write8_16(sensor->slv_addr, REG_RESET, 0x0001);
+    vTaskDelay(10 / portTICK_PERIOD_MS);
+    SCCB_Write8_16(sensor->slv_addr, REG_RESET, 0x0000);
+    return ret;
+}
+
 int mt9m001_detect(int slv_addr, sensor_id_t *id)
 {
     if (MT9M001_SCCB_ADDR == slv_addr) {
@@ -30,50 +39,67 @@ int mt9m001_detect(int slv_addr, sensor_id_t *id)
     return 0;
 }
 
+static int init_status(sensor_t *sensor)
+{
+    return 0;
+}
+
+static int set_dummy(sensor_t *sensor, int enable)
+{
+    ESP_LOGE(TAG, "Not support");
+    return -1;
+}
+
+static int set_framesize(sensor_t *sensor, framesize_t framesize)
+{
+    ESP_LOGE(TAG, "Not support");
+    return -1;
+}
+
+static int set_pixformat(sensor_t *sensor, pixformat_t pixformat)
+{
+    ESP_LOGE(TAG, "Not support");
+    return -1;
+}
+
 int mt9m001_init(sensor_t *sensor)
 {
     sensor->reset = reset;
     sensor->init_status = init_status;
     sensor->set_pixformat = set_pixformat;
     sensor->set_framesize = set_framesize;
-    sensor->set_contrast  = set_contrast;
-    sensor->set_brightness= set_brightness;
-    sensor->set_saturation= set_saturation;
+    sensor->set_contrast  = set_dummy;
+    sensor->set_brightness= set_dummy;
+    sensor->set_saturation= set_dummy;
 
-    sensor->set_quality = set_quality;
-    sensor->set_colorbar = set_colorbar;
+    sensor->set_quality = set_dummy;
+    sensor->set_colorbar = set_dummy;
 
-    sensor->set_gainceiling = set_gainceiling_sensor;
-    sensor->set_gain_ctrl = set_agc_sensor;
-    sensor->set_exposure_ctrl = set_aec_sensor;
-    sensor->set_hmirror = set_hmirror_sensor;
-    sensor->set_vflip = set_vflip_sensor;
+    sensor->set_gain_ctrl = set_dummy;
+    sensor->set_exposure_ctrl = set_dummy;
+    sensor->set_hmirror = set_dummy;
+    sensor->set_vflip = set_dummy;
 
-    sensor->set_whitebal = set_awb_dsp;
-    sensor->set_aec2 = set_aec2;
-    sensor->set_aec_value = set_aec_value;
-    sensor->set_special_effect = set_special_effect;
-    sensor->set_wb_mode = set_wb_mode;
-    sensor->set_ae_level = set_ae_level;
+    sensor->set_whitebal = set_dummy;
+    sensor->set_aec2 = set_dummy;
+    sensor->set_aec_value = set_dummy;
+    sensor->set_special_effect = set_dummy;
+    sensor->set_wb_mode = set_dummy;
+    sensor->set_ae_level = set_dummy;
 
-    sensor->set_dcw = set_dcw_dsp;
-    sensor->set_bpc = set_bpc_dsp;
-    sensor->set_wpc = set_wpc_dsp;
-    sensor->set_awb_gain = set_awb_gain_dsp;
-    sensor->set_agc_gain = set_agc_gain;
+    sensor->set_dcw = set_dummy;
+    sensor->set_bpc = set_dummy;
+    sensor->set_wpc = set_dummy;
+    sensor->set_awb_gain = set_dummy;
+    sensor->set_agc_gain = set_dummy;
 
-    sensor->set_raw_gma = set_raw_gma_dsp;
-    sensor->set_lenc = set_lenc_dsp;
+    sensor->set_raw_gma = set_dummy;
+    sensor->set_lenc = set_dummy;
 
     //not supported
-    sensor->set_sharpness = set_sharpness;
-    sensor->set_denoise = set_denoise;
+    sensor->set_sharpness = set_dummy;
+    sensor->set_denoise = set_dummy;
 
-    sensor->get_reg = get_reg;
-    sensor->set_reg = set_reg;
-    sensor->set_res_raw = set_res_raw;
-    sensor->set_pll = _set_pll;
-    sensor->set_xclk = set_xclk;
     ESP_LOGD(TAG, "MT9M001 Attached");
     return 0;
 }
