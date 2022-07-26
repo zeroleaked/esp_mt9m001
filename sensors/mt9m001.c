@@ -41,10 +41,13 @@ int mt9m001_detect(int slv_addr, sensor_id_t *id)
 
 static int init_status(sensor_t *sensor)
 {
-    uint16_t octrl_status = SCCB_Read8_16(sensor->slv_addr, REG_OCTRL);
-    SCCB_Write8_16(sensor->slv_addr, REG_OCTRL, (1<<6) | octrl_status);
-    uint16_t test_data = SCCB_Read8_16(sensor->slv_addr, REG_TEST_DATA);
-    ESP_LOGD(TAG, "Reg0x32: 0x%X", test_data);
+    // uint16_t octrl_status = SCCB_Read8_16(sensor->slv_addr, REG_OCTRL);
+    // SCCB_Write8_16(sensor->slv_addr, REG_OCTRL, (1<<6) | octrl_status);
+    // uint16_t test_data = SCCB_Read8_16(sensor->slv_addr, REG_TEST_DATA);
+    // SCCB_Write8_16(sensor->slv_addr, REG_TEST_DATA, 0x2AA | test_data);
+    // test_data = SCCB_Read8_16(sensor->slv_addr, REG_TEST_DATA);
+    // ESP_LOGD(TAG, "Reg0x32: 0x%X", test_data);
+
     return 0;
 }
 
@@ -85,6 +88,41 @@ static int set_pixformat(sensor_t *sensor, pixformat_t pixformat)
     return ret;
 }
 
+static int set_rowstart(sensor_t *sensor, uint32_t row)
+{
+    int ret = SCCB_Write8_16(sensor->slv_addr, REG_RSTART, row);
+    if (ret != ESP_OK) {
+        ESP_LOGE(TAG, "Row start setting failed");
+        return -1;
+    }
+
+    return ret;
+}
+
+static int set_colstart(sensor_t *sensor, uint32_t col)
+{
+    int ret = SCCB_Write8_16(sensor->slv_addr, REG_CSTART, col);
+    if (ret != ESP_OK) {
+        ESP_LOGE(TAG, "Column start setting failed");
+        return -1;
+    }
+
+    return ret;
+}
+
+static int set_skip4(sensor_t *sensor, int enable)
+{
+    uint16_t reg_status = SCCB_Read8_16(sensor->slv_addr, REG_READ_OPT1);
+    int ret = SCCB_Write8_16(sensor->slv_addr, REG_READ_OPT1, (1<<2) | (1<<3) | reg_status);
+    reg_status = SCCB_Read8_16(sensor->slv_addr, REG_TEST_DATA);
+    ESP_LOGD(TAG, "Reg0x1E: 0x%08X", reg_status);
+    if (ret!= ESP_OK) {
+        ESP_LOGE(TAG, "Skip setting failed");
+        return -1;
+    }
+    return ret;
+}
+
 int mt9m001_init(sensor_t *sensor)
 {
     sensor->reset = reset;
@@ -122,6 +160,10 @@ int mt9m001_init(sensor_t *sensor)
     //not supported
     sensor->set_sharpness = set_dummy;
     sensor->set_denoise = set_dummy;
+
+    sensor->set_rowstart = set_rowstart;
+    sensor->set_colstart = set_colstart;
+    sensor->set_skip4 = set_skip4;
 
     ESP_LOGD(TAG, "MT9M001 Attached");
     return 0;
