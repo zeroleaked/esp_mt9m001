@@ -59,7 +59,7 @@ static int set_dummy(sensor_t *sensor, int enable)
 
 static int set_framesize(sensor_t *sensor, framesize_t framesize)
 {
-    int ret = SCCB_Write8_16(sensor->slv_addr, REG_RSIZE, resolution[framesize].height);
+    int ret = SCCB_Write8_16(sensor->slv_addr, REG_RSIZE, resolution[framesize].height );
     if (ret != ESP_OK) {
         ESP_LOGE(TAG, "Frame height setting failed");
         return -1;
@@ -114,13 +114,19 @@ static int set_skip4(sensor_t *sensor, int enable)
 {
     uint16_t reg_status = SCCB_Read8_16(sensor->slv_addr, REG_READ_OPT1);
     int ret = SCCB_Write8_16(sensor->slv_addr, REG_READ_OPT1, (1<<2) | (1<<3) | reg_status);
-    reg_status = SCCB_Read8_16(sensor->slv_addr, REG_TEST_DATA);
+    reg_status = SCCB_Read8_16(sensor->slv_addr, REG_READ_OPT1);
     ESP_LOGD(TAG, "Reg0x1E: 0x%08X", reg_status);
     if (ret!= ESP_OK) {
         ESP_LOGE(TAG, "Skip setting failed");
         return -1;
     }
     return ret;
+}
+
+static int set_skip2(sensor_t *sensor, int enable)
+{
+    ESP_LOGE(TAG, "Not support");
+    return -1;
 }
 
 int mt9m001_init(sensor_t *sensor)
@@ -164,6 +170,7 @@ int mt9m001_init(sensor_t *sensor)
     sensor->set_rowstart = set_rowstart;
     sensor->set_colstart = set_colstart;
     sensor->set_skip4 = set_skip4;
+    sensor->set_skip2 = set_skip2;
 
     ESP_LOGD(TAG, "MT9M001 Attached");
     return 0;

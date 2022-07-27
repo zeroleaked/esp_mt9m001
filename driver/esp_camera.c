@@ -284,10 +284,10 @@ esp_err_t esp_camera_init(const camera_config_t *config)
         goto fail;
     }
 
-    if (frame_size > camera_sensor[camera_model].max_size) {
-        ESP_LOGW(TAG, "The frame size exceeds the maximum for this sensor, it will be forced to the maximum possible value");
-        frame_size = camera_sensor[camera_model].max_size;
-    }
+    // if (frame_size > camera_sensor[camera_model].max_size) {
+    //     ESP_LOGW(TAG, "The frame size exceeds the maximum for this sensor, it will be forced to the maximum possible value");
+    //     frame_size = camera_sensor[camera_model].max_size;
+    // }
 
     err = cam_config(config, frame_size, s_state->sensor.id.PID);
     if (err != ESP_OK) {

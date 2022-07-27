@@ -106,6 +106,8 @@ typedef enum {
     FRAMESIZE_WQXGA,    // 2560x1600
     FRAMESIZE_P_FHD,    // 1080x1920
     FRAMESIZE_QSXGA,    // 2560x1920
+
+    FRAMESIZE_CSKIP4,
     FRAMESIZE_INVALID
 } framesize_t;
 
@@ -253,7 +255,8 @@ typedef struct _sensor {
 
     int  (*set_rowstart)       (sensor_t *sensor, uint32_t row);
     int  (*set_colstart)       (sensor_t *sensor, uint32_t col);
-    int  (*set_skip4)       (sensor_t *sensor, int enable);
+    int  (*set_skip2)          (sensor_t *sensor, int enable);
+    int  (*set_skip4)          (sensor_t *sensor, int enable);
 } sensor_t;
 
 camera_sensor_info_t *esp_camera_sensor_get_info(sensor_id_t *id);
